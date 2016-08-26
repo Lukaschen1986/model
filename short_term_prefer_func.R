@@ -63,7 +63,7 @@ short_term_prefer <- function(my_date){
           # category_prefer
           agg_wine_mult <- aggregate(unit_mult ~ member_id, data = subset(order_items, sku_type %in% c(1,2,5,7)), sum)
           names(agg_wine_mult) <- c("member_id", "wine_unit_mult")
-          agg_beef_mult <- aggregate(unit_mult ~ member_id, data = subset(order_items, type_id == 6), sum)
+          agg_beef_mult <- aggregate(unit_mult ~ member_id, data = subset(order_items, sku_type %in% c(8,9)), sum)
           names(agg_beef_mult) <- c("member_id", "beef_unit_mult")
           agg_white_mult <- aggregate(unit_mult ~ member_id, data = subset(order_items, type_id == 3), sum)
           names(agg_white_mult) <- c("member_id", "white_unit_mult")
@@ -71,7 +71,7 @@ short_term_prefer <- function(my_date){
           agg_wine_order <- aggregate(sku_type ~ member_id + order_id, data = subset(order_items, sku_type %in% c(1,2,5,7)), length)
           agg_wine_order <- aggregate(order_id ~ member_id, data = agg_wine_order, length)
           names(agg_wine_order) <- c("member_id", "wine_unit_order")
-          agg_beef_order <- aggregate(sku_type ~ member_id + order_id, data = subset(order_items, type_id == 6), length)
+          agg_beef_order <- aggregate(sku_type ~ member_id + order_id, data = subset(order_items, sku_type %in% c(8,9)), length)
           agg_beef_order <- aggregate(order_id ~ member_id, data = agg_beef_order, length)
           names(agg_beef_order) <- c("member_id", "beef_unit_order")
           agg_white_order <- aggregate(sku_type ~ member_id + order_id, data = subset(order_items, type_id == 3), length)
@@ -112,22 +112,47 @@ short_term_prefer <- function(my_date){
           agg_wine_group_cast$group_max <- apply(agg_wine_group_cast,1,max)
           agg_wine_group_cast_logic <- agg_wine_group_cast[,2:5] == agg_wine_group_cast[,6]
           
-          categroup_prefer <- c()
+          categroup_prefer_wine <- c()
           for(i in 1:nrow(agg_wine_group_cast_logic)){
-                    if(agg_wine_group_cast_logic[i,1]==T & sum(agg_wine_group_cast_logic[i,1])==1){
-                              categroup_prefer[i]<-1
-                    }else if(agg_wine_group_cast_logic[i,2]==T & sum(agg_wine_group_cast_logic[i,2])==1){
-                              categroup_prefer[i]<-2
-                    }else if(agg_wine_group_cast_logic[i,3]==T & sum(agg_wine_group_cast_logic[i,3])==1){
-                              categroup_prefer[i]<-5
-                    }else if(agg_wine_group_cast_logic[i,4]==T & sum(agg_wine_group_cast_logic[i,4])==1){
-                              categroup_prefer[i]<-7
+                    if(agg_wine_group_cast_logic[i,1]==T & sum(agg_wine_group_cast_logic[i,])==1){
+                              categroup_prefer_wine[i]<-1
+                    }else if(agg_wine_group_cast_logic[i,2]==T & sum(agg_wine_group_cast_logic[i,])==1){
+                              categroup_prefer_wine[i]<-2
+                    }else if(agg_wine_group_cast_logic[i,3]==T & sum(agg_wine_group_cast_logic[i,])==1){
+                              categroup_prefer_wine[i]<-5
+                    }else if(agg_wine_group_cast_logic[i,4]==T & sum(agg_wine_group_cast_logic[i,])==1){
+                              categroup_prefer_wine[i]<-7
                     }else{
-                              categroup_prefer[i]<-NA
+                              categroup_prefer_wine[i]<-NA
                     }
           }
-          agg_wine_group_cast <- cbind(agg_wine_group_cast, categroup_prefer)
-          member_list_2 <- merge(member_list, agg_wine_group_cast[,c("member_id","categroup_prefer")], by = "member_id", all = T)
+          agg_wine_group_cast <- cbind(agg_wine_group_cast, categroup_prefer_wine)
+          
+          # categroup_prefer:beef
+          agg_beef_group <- aggregate(unit_mult ~ member_id + sku_type, 
+                                      data = subset(order_items, sku_type %in% c(8,9) 
+                                                    & member_id %in% subset(member_list, category_prefer == 2)$member_id), 
+                                      sum)
+          agg_beef_group_cast <- cast(agg_beef_group, member_id ~ sku_type, value = "unit_mult", fill = 0) 
+          agg_beef_group_cast$group_max <- apply(agg_beef_group_cast,1,max)
+          agg_beef_group_cast_logic <- agg_beef_group_cast[,2:3] == agg_beef_group_cast[,4]
+          
+          categroup_prefer_beef <- c()
+          for(i in 1:nrow(agg_beef_group_cast_logic)){
+                    if(agg_beef_group_cast_logic[i,1]==T & sum(agg_beef_group_cast_logic[i,])==1){
+                              categroup_prefer_beef[i]<-8
+                    }else if(agg_beef_group_cast_logic[i,2]==T & sum(agg_beef_group_cast_logic[i,])==1){
+                              categroup_prefer_beef[i]<-9
+                    }else{
+                              categroup_prefer_beef[i]<-NA
+                    }
+          }
+          agg_beef_group_cast <- cbind(agg_beef_group_cast, categroup_prefer_beef)
+          
+          member_list_2 <- merge(member_list, agg_wine_group_cast[,c("member_id","categroup_prefer_wine")], by = "member_id", all = T)
+          member_list_2 <- merge(member_list_2, agg_beef_group_cast[,c("member_id","categroup_prefer_beef")], by = "member_id", all = T)
+          member_list_2$categroup_prefer <- apply(member_list_2[,3:4], 1, sum, na.rm = T)
+          member_list_2 <- member_list_2[,c("member_id","category_prefer","categroup_prefer")]
           
           # price_prefer
           orders$price_prefer[orders$final_amount <= 100] <- 1
