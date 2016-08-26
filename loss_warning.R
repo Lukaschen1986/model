@@ -8,9 +8,8 @@ data_divide <- function(df, divide_1 = 0.8){
           return(res)
 }
 
-vctr_idnt <- function(x){x/sqrt(sum(x^2))}
-
 bagging_func <- function(train, iter){
+          vctr_idnt <- function(x){x/sqrt(sum(x^2))}
           # iter = 5
           idx <- c(); y_train <- list(); X_train <- list(); w_hat <- c()
           for(i in 1:iter){
@@ -36,6 +35,8 @@ bagging_func <- function(train, iter){
                                                     categroup_dumm_2 = train$categroup_dumm_2[idx[i,]],
                                                     categroup_dumm_3 = train$categroup_dumm_3[idx[i,]],
                                                     categroup_dumm_4 = train$categroup_dumm_4[idx[i,]],
+                                                    categroup_dumm_5 = train$categroup_dumm_5[idx[i,]],
+                                                    categroup_dumm_6 = train$categroup_dumm_6[idx[i,]],
                                                     lv_id_dumm_1 = train$lv_id_dumm_1[idx[i,]],
                                                     lv_id_dumm_2 = train$lv_id_dumm_2[idx[i,]],
                                                     lv_id_dumm_3 = train$lv_id_dumm_3[idx[i,]],
@@ -71,7 +72,7 @@ bagging_func <- function(train, iter){
 loss_warning_func <- function(mydate){
           # set_time
           statistic_date <- mydate
-          # statistic_date <- as.Date("2016-05-01")
+          # statistic_date <- as.Date("2016-08-01")
           begin_date <- statistic_date-180+1-as.POSIXlt(statistic_date-180)$mday
           end_date <- statistic_date-as.POSIXlt(statistic_date)$mday
           
@@ -231,10 +232,14 @@ loss_warning_func <- function(mydate){
           res_short$categroup_dumm_2 <- c(0)
           res_short$categroup_dumm_3 <- c(0)
           res_short$categroup_dumm_4 <- c(0)
-          res_short$categroup_dumm_4[res_short$categroup_prefer == 2] <- 1
-          res_short$categroup_dumm_3[res_short$categroup_prefer == 5] <- 1
-          res_short$categroup_dumm_2[res_short$categroup_prefer == 7] <- 1
-          res_short$categroup_dumm_1[res_short$categroup_prefer == 99] <- 1
+          res_short$categroup_dumm_5 <- c(0)
+          res_short$categroup_dumm_6 <- c(0)
+          res_short$categroup_dumm_6[res_short$categroup_prefer == 2] <- 1
+          res_short$categroup_dumm_5[res_short$categroup_prefer == 5] <- 1
+          res_short$categroup_dumm_4[res_short$categroup_prefer == 7] <- 1
+          res_short$categroup_dumm_3[res_short$categroup_prefer == 8] <- 1
+          res_short$categroup_dumm_2[res_short$categroup_prefer == 9] <- 1
+          res_short$categroup_dumm_1[res_short$categroup_prefer == 0] <- 1
           
           ## edm_sensitivity
           source("edm_sensitivity_func.R")
@@ -270,7 +275,7 @@ loss_warning_func <- function(mydate){
           df_complete$lv_id_dumm_2[df_complete$member_lv_id == 4] <- 1
           df_complete$lv_id_dumm_1[df_complete$member_lv_id == 5] <- 1
           
-          df_complete <- df_complete[,c("member_id","order_sum","amount_sum","bn_sum","nums_sum","unitmult_sum","sensitivity_score","unitmult_bao_sum","cart_sum","point","experience","netage","category_dumm_1","category_dumm_2","category_dumm_3","categroup_dumm_1","categroup_dumm_2","categroup_dumm_3","categroup_dumm_4","lv_id_dumm_1","lv_id_dumm_2","lv_id_dumm_3","lv_id_dumm_4")]
+          df_complete <- df_complete[,c("member_id","order_sum","amount_sum","bn_sum","nums_sum","unitmult_sum","sensitivity_score","unitmult_bao_sum","cart_sum","point","experience","netage","category_dumm_1","category_dumm_2","category_dumm_3","categroup_dumm_1","categroup_dumm_2","categroup_dumm_3","categroup_dumm_4","categroup_dumm_5","categroup_dumm_6","lv_id_dumm_1","lv_id_dumm_2","lv_id_dumm_3","lv_id_dumm_4")]
           
           # data_divide
           df_active <- subset(df_complete, member_id %in% member_id_active)
@@ -315,6 +320,8 @@ loss_warning_func <- function(mydate){
                                     categroup_dumm_2 = test$categroup_dumm_2,
                                     categroup_dumm_3 = test$categroup_dumm_3,
                                     categroup_dumm_4 = test$categroup_dumm_4,
+                                    categroup_dumm_5 = test$categroup_dumm_5,
+                                    categroup_dumm_6 = test$categroup_dumm_6,
                                     lv_id_dumm_1 = test$lv_id_dumm_1,
                                     lv_id_dumm_2 = test$lv_id_dumm_2,
                                     lv_id_dumm_3 = test$lv_id_dumm_3,
@@ -332,11 +339,11 @@ loss_warning_func <- function(mydate){
           # blending
           train_2 <- train[,-1]
           train_2$is_loss <- factor(train_2$is_loss)
-          train_2 <- cbind(scale(train_2[,1:11]), train_2[,12:23])
+          train_2 <- cbind(scale(train_2[,1:11]), train_2[,12:25])
           
           test_2 <- test[,-1]
           test_2$is_loss <- factor(test_2$is_loss)
-          test_2 <- cbind(scale(test_2[,1:11]), test_2[,12:23])
+          test_2 <- cbind(scale(test_2[,1:11]), test_2[,12:25])
           ## rf
           set.seed(111)
           fit.rf <- randomForest(is_loss ~ ., data = train_2, 
@@ -399,10 +406,14 @@ loss_warning_func <- function(mydate){
           res_short_2$categroup_dumm_2 <- c(0)
           res_short_2$categroup_dumm_3 <- c(0)
           res_short_2$categroup_dumm_4 <- c(0)
-          res_short_2$categroup_dumm_4[res_short_2$categroup_prefer == 2] <- 1
-          res_short_2$categroup_dumm_3[res_short_2$categroup_prefer == 5] <- 1
-          res_short_2$categroup_dumm_2[res_short_2$categroup_prefer == 7] <- 1
-          res_short_2$categroup_dumm_1[res_short_2$categroup_prefer == 99] <- 1
+          res_short_2$categroup_dumm_5 <- c(0)
+          res_short_2$categroup_dumm_6 <- c(0)
+          res_short_2$categroup_dumm_6[res_short_2$categroup_prefer == 2] <- 1
+          res_short_2$categroup_dumm_5[res_short_2$categroup_prefer == 5] <- 1
+          res_short_2$categroup_dumm_4[res_short_2$categroup_prefer == 7] <- 1
+          res_short_2$categroup_dumm_3[res_short_2$categroup_prefer == 8] <- 1
+          res_short_2$categroup_dumm_2[res_short_2$categroup_prefer == 9] <- 1
+          res_short_2$categroup_dumm_1[res_short_2$categroup_prefer == 0] <- 1
           
           res_edm_2 <- edm_sensitivity(my_date = statistic_date)
           res_edm_2$sensitivity_score <- as.numeric(res_edm_2$sensitivity_score)
@@ -436,7 +447,7 @@ loss_warning_func <- function(mydate){
           df_complete_2$lv_id_dumm_2[df_complete_2$member_lv_id == 4] <- 1
           df_complete_2$lv_id_dumm_1[df_complete_2$member_lv_id == 5] <- 1
           
-          df_complete_2 <- df_complete_2[,c("member_id","order_sum","amount_sum","bn_sum","nums_sum","unitmult_sum","sensitivity_score","unitmult_bao_sum","cart_sum","point","experience","netage","category_dumm_1","category_dumm_2","category_dumm_3","categroup_dumm_1","categroup_dumm_2","categroup_dumm_3","categroup_dumm_4","lv_id_dumm_1","lv_id_dumm_2","lv_id_dumm_3","lv_id_dumm_4")]
+          df_complete_2 <- df_complete_2[,c("member_id","order_sum","amount_sum","bn_sum","nums_sum","unitmult_sum","sensitivity_score","unitmult_bao_sum","cart_sum","point","experience","netage","category_dumm_1","category_dumm_2","category_dumm_3","categroup_dumm_1","categroup_dumm_2","categroup_dumm_3","categroup_dumm_4","categroup_dumm_5","categroup_dumm_6","lv_id_dumm_1","lv_id_dumm_2","lv_id_dumm_3","lv_id_dumm_4")]
           
           X_data <- as.matrix(cbind(b0 = c(1), 
                                     scale(df_complete_2[,c("order_sum",
@@ -457,6 +468,8 @@ loss_warning_func <- function(mydate){
                                     categroup_dumm_2 = df_complete_2$categroup_dumm_2,
                                     categroup_dumm_3 = df_complete_2$categroup_dumm_3,
                                     categroup_dumm_4 = df_complete_2$categroup_dumm_4,
+                                    categroup_dumm_5 = df_complete_2$categroup_dumm_5,
+                                    categroup_dumm_6 = df_complete_2$categroup_dumm_6,
                                     lv_id_dumm_1 = df_complete_2$lv_id_dumm_1,
                                     lv_id_dumm_2 = df_complete_2$lv_id_dumm_2,
                                     lv_id_dumm_3 = df_complete_2$lv_id_dumm_3,
