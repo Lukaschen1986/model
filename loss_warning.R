@@ -1,75 +1,75 @@
-# func
-data_divide <- function(df, divide_1 = 0.8){
-          df <- df[sample(1:nrow(df), nrow(df)), ]
-          idx <- sample(1:nrow(df), nrow(df)*divide_1)
-          train <- df[idx,]
-          test <- df[-idx,]
-          res <- list(train = train, test = test)
-          return(res)
-}
-
-bagging_func <- function(train, iter){
-          vctr_idnt <- function(x){x/sqrt(sum(x^2))}
-          # iter = 5
-          idx <- c(); y_train <- list(); X_train <- list(); w_hat <- c()
-          for(i in 1:iter){
-                    # i = 5
-                    idx <- rbind(idx, sample(1:nrow(train), nrow(train), replace = T))
-                    y_train[[i]] <- train[idx[i,],c("is_loss")]
-                    X_train[[i]] <- as.matrix(cbind(b0 = c(1), 
-                                                    scale(train[idx[i,], c("order_sum",
-                                                                           "amount_sum",
-                                                                           "bn_sum",
-                                                                           "nums_sum",
-                                                                           "unitmult_sum",
-                                                                           "sensitivity_score",
-                                                                           "unitmult_bao_sum",
-                                                                           "cart_sum",
-                                                                           "point",
-                                                                           "experience",
-                                                                           "netage")]), 
-                                                    category_dumm_1 = train$category_dumm_1[idx[i,]],
-                                                    category_dumm_2 = train$category_dumm_2[idx[i,]],
-                                                    category_dumm_3 = train$category_dumm_3[idx[i,]],
-                                                    categroup_dumm_1 = train$categroup_dumm_1[idx[i,]],
-                                                    categroup_dumm_2 = train$categroup_dumm_2[idx[i,]],
-                                                    categroup_dumm_3 = train$categroup_dumm_3[idx[i,]],
-                                                    categroup_dumm_4 = train$categroup_dumm_4[idx[i,]],
-                                                    categroup_dumm_5 = train$categroup_dumm_5[idx[i,]],
-                                                    categroup_dumm_6 = train$categroup_dumm_6[idx[i,]],
-                                                    lv_id_dumm_1 = train$lv_id_dumm_1[idx[i,]],
-                                                    lv_id_dumm_2 = train$lv_id_dumm_2[idx[i,]],
-                                                    lv_id_dumm_3 = train$lv_id_dumm_3[idx[i,]],
-                                                    lv_id_dumm_4 = train$lv_id_dumm_4[idx[i,]]))
-                    
-                    n <- 50000; p <- ncol(X_train[[i]])
-                    w <- matrix(data = rep(0,n*p), nrow = n, ncol = p, byrow = T)
-                    e_in <- c(1); yita <- 0.001 # 0.01, 0.03, 0.1, 0.3, 1, 3, 10
-                    
-                    for(k in 2:nrow(w)){
-                              w[k,] <- w[k-1,] - yita*t(vctr_idnt(t(1/(1+exp(y_train[[i]]*X_train[[i]]%*%w[k-1,])))%*%(-y_train[[i]]*X_train[[i]])/nrow(X_train[[i]])))
-                              e_in[k] <- sum(log(1+exp(-y_train[[i]]*X_train[[i]]%*%w[k,])))/nrow(X_train[[i]])
-                              if(round(e_in[k],7) == round(e_in[k-1],7)){break}
+loss_warning_func <- function(mydate, myiter){
+          # func
+          data_divide <- function(df, divide_1 = 0.8){
+                    df <- df[sample(1:nrow(df), nrow(df)), ]
+                    idx <- sample(1:nrow(df), nrow(df)*divide_1)
+                    train <- df[idx,]
+                    test <- df[-idx,]
+                    res <- list(train = train, test = test)
+                    return(res)
+          }
+          
+          bagging_func <- function(train, iter){
+                    vctr_idnt <- function(x){x/sqrt(sum(x^2))}
+                    # iter = 5
+                    idx <- c(); y_train <- list(); X_train <- list(); w_hat <- c()
+                    for(i in 1:iter){
+                              # i = 5
+                              idx <- rbind(idx, sample(1:nrow(train), nrow(train), replace = T))
+                              y_train[[i]] <- train[idx[i,],c("is_loss")]
+                              X_train[[i]] <- as.matrix(cbind(b0 = c(1), 
+                                                              scale(train[idx[i,], c("order_sum",
+                                                                                     "amount_sum",
+                                                                                     "bn_sum",
+                                                                                     "nums_sum",
+                                                                                     "unitmult_sum",
+                                                                                     "sensitivity_score",
+                                                                                     "unitmult_bao_sum",
+                                                                                     "cart_sum",
+                                                                                     "point",
+                                                                                     "experience",
+                                                                                     "netage")]), 
+                                                              category_dumm_1 = train$category_dumm_1[idx[i,]],
+                                                              category_dumm_2 = train$category_dumm_2[idx[i,]],
+                                                              category_dumm_3 = train$category_dumm_3[idx[i,]],
+                                                              categroup_dumm_1 = train$categroup_dumm_1[idx[i,]],
+                                                              categroup_dumm_2 = train$categroup_dumm_2[idx[i,]],
+                                                              categroup_dumm_3 = train$categroup_dumm_3[idx[i,]],
+                                                              categroup_dumm_4 = train$categroup_dumm_4[idx[i,]],
+                                                              categroup_dumm_5 = train$categroup_dumm_5[idx[i,]],
+                                                              categroup_dumm_6 = train$categroup_dumm_6[idx[i,]],
+                                                              lv_id_dumm_1 = train$lv_id_dumm_1[idx[i,]],
+                                                              lv_id_dumm_2 = train$lv_id_dumm_2[idx[i,]],
+                                                              lv_id_dumm_3 = train$lv_id_dumm_3[idx[i,]],
+                                                              lv_id_dumm_4 = train$lv_id_dumm_4[idx[i,]]))
+                              
+                              n <- 50000; p <- ncol(X_train[[i]])
+                              w <- matrix(data = rep(0,n*p), nrow = n, ncol = p, byrow = T)
+                              e_in <- c(1); yita <- 0.001 # 0.01, 0.03, 0.1, 0.3, 1, 3, 10
+                              
+                              for(k in 2:nrow(w)){
+                                        w[k,] <- w[k-1,] - yita*t(vctr_idnt(t(1/(1+exp(y_train[[i]]*X_train[[i]]%*%w[k-1,])))%*%(-y_train[[i]]*X_train[[i]])/nrow(X_train[[i]])))
+                                        e_in[k] <- sum(log(1+exp(-y_train[[i]]*X_train[[i]]%*%w[k,])))/nrow(X_train[[i]])
+                                        if(round(e_in[k],7) == round(e_in[k-1],7)){break}
+                              }
+                              plot(e_in[-1], type = "b")
+                              w_hat <- rbind(w_hat, w[which.min(e_in[-1])+1,])
                     }
-                    plot(e_in, type = "b")
-                    w_hat <- rbind(w_hat, w[which.min(e_in),])
+                    
+                    p_hat_test <- c(); y_pred_test <- c()
+                    for(i in 1:iter){
+                              p_hat_test <- cbind(p_hat_test, 1/(1+exp(-X_test%*%w_hat[i,])))
+                    }
+                    p_hat_test_final <- apply(p_hat_test,1,mean)
+                    # y_pred_test <- ifelse(p_hat_test_final >= (0.5+mean(p_hat_test_final))/2, 1, -1)
+                    y_pred_test <- ifelse(p_hat_test_final >= 0.5, 1, -1)
+                    # y_pred_test <- ifelse(p_hat_test_final >= median(p_hat_test_final), 1, -1)
+                    accu_test <- sum(y_pred_test == y_test)/length(y_test)
+                    
+                    res <- list(p_hat_test_final = p_hat_test_final, y_pred_test = y_pred_test, w_hat = w_hat, accu_test = accu_test)
+                    return(res)
           }
           
-          p_hat_test <- c(); y_pred_test <- c()
-          for(i in 1:iter){
-                    p_hat_test <- cbind(p_hat_test, 1/(1+exp(-X_test%*%w_hat[i,])))
-          }
-          p_hat_test_final <- apply(p_hat_test,1,mean)
-          y_pred_test <- ifelse(p_hat_test_final >= (0.5+mean(p_hat_test_final))/2, 1, -1)
-          # y_pred_test <- ifelse(p_hat_test_final >= 0.5, 1, -1)
-          # y_pred_test <- ifelse(p_hat_test_final >= median(p_hat_test_final), 1, -1)
-          accu_test <- sum(y_pred_test == y_test)/length(y_test)
-          
-          res <- list(p_hat_test_final = p_hat_test_final, y_pred_test = y_pred_test, w_hat = w_hat, accu_test = accu_test)
-          return(res)
-}
-
-loss_warning_func <- function(mydate){
           # set_time
           statistic_date <- mydate
           # statistic_date <- as.Date("2016-08-01")
@@ -115,7 +115,7 @@ loss_warning_func <- function(mydate){
                            (select order_id, type_id, goods_id, product_id, bn, nums, g_price, amount from sdb_b2c_archive_order_items)b 
                            on a.order_id = b.order_id;", sep = "")
           
-          member_sql <- paste("select member_id, member_lv_id, point, experience, sex, 
+          member_sql <- paste("select member_id, member_lv_id, email, point, experience,  
                               from_unixtime(regtime,'%Y-%m-%d') as regtime
                               from sdb_b2c_members where regtime <> '0'")
           
@@ -164,6 +164,8 @@ loss_warning_func <- function(mydate){
           order_items$unit_mult <- order_items$nums*order_items$unit
           
           members <- dbGetQuery(mossel, member_sql)
+          scrtry_email <- read.csv(file = "scrtry_email.csv")
+          scrtry_member <- merge(members, scrtry_email, by = "email")
           
           cart <- dbGetQuery(mossel, cart_sql)
           cart$cart_month <- as.Date(cart$cart_time) + 1 - as.POSIXlt(cart$cart_time)$mday
@@ -171,11 +173,16 @@ loss_warning_func <- function(mydate){
           baokuan <- dbGetQuery(mossel, bao_sql)
           
           # delete_outliers
-          member_agg <- aggregate(unit_mult ~ order_id, data = subset(order_items, sku_type != 4), FUN = sum)
-          member_agg$scale <- scale(member_agg$unit_mult, center = T, scale = T)
-          member_agg <- subset(member_agg, scale < 1 & unit_mult >= 1)
-          orders <- subset(orders, order_id %in% member_agg$order_id)
-          order_items <- subset(order_items, order_id %in% member_agg$order_id)
+          mult_agg <- aggregate(unit_mult ~ order_id, data = subset(order_items, sku_type != 4), FUN = sum)
+          mult_agg$scale <- scale(mult_agg$unit_mult, center = T, scale = T)
+          mult_agg <- subset(mult_agg, scale < 2 & unit_mult >= 1)
+          
+          order_agg <- aggregate(order_id ~ member_id, data = orders, FUN = length)
+          order_agg$scale <- scale(order_agg$order_id, center = T, scale = T)
+          order_agg <- subset(order_agg, scale < 2 & order_id >= 1)
+          
+          orders <- subset(orders, order_id %in% mult_agg$order_id & final_amount > 0 & !member_id %in% scrtry_member$member_id & member_id %in% order_agg$member_id)
+          order_items <- subset(order_items, order_id %in% mult_agg$order_id & final_amount > 0 & !member_id %in% scrtry_member$member_id & sku_type != 4 & member_id %in% order_agg$member_id)
           
           # member_id分组：活跃+流失
           diff_date <- statistic_date-90+1-as.POSIXlt(statistic_date-90)$mday
@@ -198,7 +205,7 @@ loss_warning_func <- function(mydate){
           order_agg <- aggregate(order_id ~ member_id, data = orders_left, FUN = length)
           names(order_agg) <- c("member_id","order_sum")
           
-          amount_agg <- aggregate(final_amount ~ member_id, data = order_items_left, FUN = sum)
+          amount_agg <- aggregate(amount ~ member_id, data = order_items_left, FUN = sum)
           names(amount_agg) <- c("member_id","amount_sum")
           
           bn_agg <- aggregate(bn ~ member_id, data = order_items_left, FUN = length)
@@ -217,9 +224,9 @@ loss_warning_func <- function(mydate){
           names(cart_agg) <- c("member_id","cart_sum")
           
           ## short_term_prefer
-          source("short_term_prefer_func_v2.R")
+          source("short_term_prefer_func_v3.R")
           res_short <- short_term_prefer(my_date = diff_date)
-          res_short$categroup_prefer[res_short$categroup_prefer %in% NA] <- 99
+          # res_short$categroup_prefer[res_short$categroup_prefer %in% NA] <- 99
           
           res_short$category_dumm_1 <- c(0)
           res_short$category_dumm_2 <- c(0)
@@ -242,7 +249,7 @@ loss_warning_func <- function(mydate){
           res_short$categroup_dumm_1[res_short$categroup_prefer == 0] <- 1
           
           ## edm_sensitivity
-          source("edm_sensitivity_func.R")
+          source("edm_sensitivity_func_v2.R")
           res_edm <- edm_sensitivity(my_date = diff_date)
           res_edm$sensitivity_score <- as.numeric(res_edm$sensitivity_score)
           
@@ -296,8 +303,8 @@ loss_warning_func <- function(mydate){
                     chisq_test[i] <- chisq.test(rbind(table(train$is_loss), table(test$is_loss)))$p.value
                     if(chisq_test[i] >= 0.8){break}
           }
-          # chisq_test
-          # rbind(table(train$is_loss), table(test$is_loss))
+          chisq_test
+          rbind(table(train$is_loss), table(test$is_loss))
           
           # train_and_test
           y_test <- test$is_loss
@@ -326,8 +333,8 @@ loss_warning_func <- function(mydate){
                                     lv_id_dumm_2 = test$lv_id_dumm_2,
                                     lv_id_dumm_3 = test$lv_id_dumm_3,
                                     lv_id_dumm_4 = test$lv_id_dumm_4))
-          
-          res_bagging <- bagging_func(train = train, iter = 10)
+          # myiter = 15
+          res_bagging <- bagging_func(train = train, iter = myiter)
           res_bagging$accu_test # 0.8288191
           # table(y_test, res_bagging$y_pred_test)
           
@@ -359,7 +366,7 @@ loss_warning_func <- function(mydate){
           
           ## nnet
           set.seed(222)
-          fit.nnet <- nnet(is_loss ~ ., data = train_2, size = 10, decay = 0.01, maxit = 1000, inout = F, trace = F)
+          fit.nnet <- nnet(is_loss ~ ., data = train_2, size = 10, decay = 0.001, maxit = 1000, inout = F, trace = F)
           pred.nnet <- predict(fit.nnet, newdata = test_2, type = "class")
           accu_nnet <- sum(pred.nnet == test_2$is_loss)/nrow(test_2) # 0.8450704
           # table(test_2$is_loss, pred.nnet)
@@ -374,7 +381,7 @@ loss_warning_func <- function(mydate){
           order_agg_2 <- aggregate(order_id ~ member_id, data = orders_right, FUN = length)
           names(order_agg_2) <- c("member_id","order_sum")
           
-          amount_agg_2 <- aggregate(final_amount ~ member_id, data = order_items_right, FUN = sum)
+          amount_agg_2 <- aggregate(amount ~ member_id, data = order_items_right, FUN = sum)
           names(amount_agg_2) <- c("member_id","amount_sum")
           
           bn_agg_2 <- aggregate(bn ~ member_id, data = order_items_right, FUN = length)
@@ -393,7 +400,7 @@ loss_warning_func <- function(mydate){
           names(cart_agg_2) <- c("member_id","cart_sum")
           
           res_short_2 <- short_term_prefer(my_date = statistic_date)
-          res_short_2$categroup_prefer[res_short_2$categroup_prefer %in% NA] <- 99
+          # res_short_2$categroup_prefer[res_short_2$categroup_prefer %in% NA] <- 99
           
           res_short_2$category_dumm_1 <- c(0)
           res_short_2$category_dumm_2 <- c(0)
@@ -476,11 +483,12 @@ loss_warning_func <- function(mydate){
                                     lv_id_dumm_4 = df_complete_2$lv_id_dumm_4))
           
           p_hat <- c()
-          for(i in 1:10){
+          for(i in 1:myiter){
                     p_hat <- cbind(p_hat, 1/(1+exp(-X_data%*%res_bagging$w_hat[i,])))
           }
           p_hat <- apply(p_hat, 1, mean)
-          y_pred <- ifelse(p_hat >= (0.5+mean(p_hat))/2, 1, -1)
+          # y_pred <- ifelse(p_hat >= (0.5+mean(p_hat))/2, 1, -1)
+          y_pred <- ifelse(p_hat >= 0.5, 1, -1)
           
           rf_pred <- predict(fit.rf, newdata = X_data)
           nnet_pred <- predict(fit.nnet, newdata = X_data, type = "class")
@@ -489,17 +497,29 @@ loss_warning_func <- function(mydate){
                                   pred_rf = as.numeric(as.character(rf_pred)),
                                   pred_nnet = as.numeric(as.character(nnet_pred)))
           df_pred_2$pred_blending <- sign(apply(df_pred_2, 1, sum))
+          df_pred_2 <- cbind(member_id = df_complete_2[,1], p_hat, df_pred_2)
           
-          df_pred_2 <- cbind(member_id = df_complete_2[,1], df_pred_2, p_hat)
-
-          res_final <- list(w_bagging = res_bagging$w_hat,
-                            w_rf = fit.rf, 
-                            w_nnet = fit.nnet, 
-                            accu_bagging = res_bagging$accu_test,
-                            accu_rf = accu_rf,
-                            accu_nnet = accu_nnet,
-                            accu_blending = accu_blending,
-                            member_list = df_pred_2)
+          df_pred_2$c[df_pred_2$pred_lr == -1 & df_pred_2$pred_blending == -1] <- 1
+          df_pred_2$c[df_pred_2$pred_lr == 1 & df_pred_2$pred_blending == 1] <- 2
+          df_pred_2$c[df_pred_2$pred_lr == -1 & df_pred_2$pred_blending == 1] <- 3
+          df_pred_2$c[df_pred_2$pred_lr == 1 & df_pred_2$pred_blending == -1] <- 4
+          
+          df_pred_2$p_hat_new[df_pred_2$c %in% c(1,2)] <- df_pred_2$p_hat[df_pred_2$c %in% c(1,2)]
+          df_pred_2$p_hat_new[df_pred_2$c == 3] <- tapply(df_pred_2$p_hat, df_pred_2$c, mean)[2]*0.8+df_pred_2$p_hat[df_pred_2$c == 3]*0.2
+          df_pred_2$p_hat_new[df_pred_2$c == 4] <- tapply(df_pred_2$p_hat, df_pred_2$c, mean)[1]*0.8+df_pred_2$p_hat[df_pred_2$c == 4]*0.2
+          
+          df_pred_3 <- df_pred_2[,c("member_id","pred_blending","p_hat_new")]
+          df_pred_3$etl_date <- statistic_date
+          # save(df_pred_2, file = "df_pred_2.RData")
+          
+          accu_data <- data.frame(accu_bagging = res_bagging$accu_test,
+                                  accu_nnet = accu_nnet,
+                                  accu_rf = accu_rf,
+                                  accu_blending = accu_blending,
+                                  etl_date = statistic_date)
+          
+          res_final <- list(accu_data = accu_data,
+                            member_list = df_pred_3)
           return(res_final)
 }
 
