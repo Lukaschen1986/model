@@ -38,6 +38,10 @@ short_term_prefer <- function(my_date){
                          (select order_id, type_id, product_id, bn, nums, g_price, amount from sdb_b2c_order_items)b 
                          on a.order_id = b.order_id;", sep = "")
           
+          member_sql <- paste("select member_id, member_lv_id, email, point, experience, sex, 
+                              from_unixtime(regtime,'%Y-%m-%d') as regtime
+                              from sdb_b2c_members where regtime <> '0'")
+          
           orders <- dbGetQuery(mossel, sql_1)
           orders$order_id <- as.character(orders$order_id)
           orders$member_id <- as.character(orders$member_id)
@@ -51,12 +55,21 @@ short_term_prefer <- function(my_date){
           order_items <- merge(x = order_items, y = sku, by = "bn")
           order_items$unit_mult <- order_items$nums*order_items$unit
           
+          members <- dbGetQuery(mossel, member_sql)
+          scrtry_email <- read.csv(file = "scrtry_email.csv")
+          scrtry_member <- merge(members, scrtry_email, by = "email")
+          
           # delete outliers
-          member_agg <- aggregate(unit_mult ~ order_id, data = subset(order_items, sku_type != 4), FUN = sum)
-          member_agg$scale <- scale(member_agg$unit_mult, center = T, scale = T)
-          member_agg <- subset(member_agg, scale < 1 & unit_mult >= 1)
-          orders <- subset(orders, order_id %in% member_agg$order_id)
-          order_items <- subset(order_items, order_id %in% member_agg$order_id)
+          mult_agg <- aggregate(unit_mult ~ order_id, data = subset(order_items, sku_type != 4), FUN = sum)
+          mult_agg$scale <- scale(mult_agg$unit_mult, center = T, scale = T)
+          mult_agg <- subset(mult_agg, scale < 2 & unit_mult >= 1)
+          
+          order_agg <- aggregate(order_id ~ member_id, data = orders, FUN = length)
+          order_agg$scale <- scale(order_agg$order_id, center = T, scale = T)
+          order_agg <- subset(order_agg, scale < 2 & order_id >= 1)
+          
+          orders <- subset(orders, order_id %in% mult_agg$order_id & final_amount > 0 & !member_id %in% scrtry_member$member_id & member_id %in% order_agg$member_id)
+          order_items <- subset(order_items, order_id %in% mult_agg$order_id & final_amount > 0 & !member_id %in% scrtry_member$member_id & sku_type != 4 & member_id %in% order_agg$member_id)
           
           member_list <- data.frame(member_id = unique(orders$member_id))
           
